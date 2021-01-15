@@ -7,9 +7,8 @@ This simple, quick, and transparent method requires two haploid genomes (or a si
 
 The directory 'Pipeline' contains all the scripts necessary to run both the TT method (estimating divergence times without using an outgroup) and the TTO method (estimating population divergence using an outgroup). Users should download all scripts and empty directories to a suitable location.
 
-Both methods require the ancestral states at all positions in the genome. The directory 'Ancestral_states' contains an example of such files created for the human genome using consensus sequence among three species of apes. (The TT & TTO methods consider a particular position informative only when the ancestral state has consensus support among all three ape species). If intending to estimate divergence times for human populations, the files in 'ancestral_states' should be downloaded, otherwise the user will need to create their own 'ancestral state' files of similar format, (one '.txt' file per chromosome, one line per site, for all sites in the genome).
-
-The TT method requires one all-sites vcf file per chromosome, per individual. An example of such a vcf file is included in the directory 'Examples'.
+Both TT and TTO methods require the ancestral states at all positions in the genome. An example of such files created for the human genome based on consensus among three species of apes can be found at the zenodo DOI below. The TT & TTO methods consider a particular position informative only when the ancestral state has consensus support among all three of Gorilla, Chimpanzee and Orangutan. If intending to estimate divergence times for human populations, the files in 'ancestral_states' can be downloaded and used. To estimate divergence times for other species, the user will need to create their own 'ancestral state' files of similar format, (one '.txt' file per chromosome, one line per site, for all sites in the genome).
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4441887.svg)](https://doi.org/10.5281/zenodo.4441887)
 
 ---------------------------------------------------------
 
