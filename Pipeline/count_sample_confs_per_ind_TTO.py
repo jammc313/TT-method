@@ -1,6 +1,7 @@
 import sys
 import gzip
 import get_file_name
+from zipfile import ZipFile
 
 def get_var_form(a_list):
     for x in a_list:
@@ -167,91 +168,87 @@ win_end=win_start+win_step
 out_dict={(win_start,win_end):{'A':[0,0,0,0,0,0,0,0,0],'C':[0,0,0,0,0,0,0,0,0],'G':[0,0,0,0,0,0,0,0,0],'T':[0,0,0,0,0,0,0,0,0]}}
 
 
-anc_file=open(ancPath+'/chr'+the_chr+'.txt','r')
-with gzip.open(vcf_file1,'rt',encoding='utf-8') as myf1:
-    with gzip.open(vcf_file2,'rt',encoding='utf-8') as myf2:
-        with gzip.open(outgrp_vcf,'rt',encoding='utf-8') as outgrpf:
-            l1='##'
-            while l1[0]=='#':
-                l1=myf1.readline()
+with ZipFile(ancPath+'/Ancestral_states.zip', 'r') as z:
+    with z.open('Ancestral_states/chr'+the_chr+'.txt','r') as anc_file:
+        with gzip.open(vcf_file1,'rt',encoding='utf-8') as myf1:
+            with gzip.open(vcf_file2,'rt',encoding='utf-8') as myf2:
+                with gzip.open(outgrp_vcf,'rt',encoding='utf-8') as outgrpf:
+                    l1='##'
+                    while l1[0]=='#':
+                        l1=myf1.readline()
 
-            l2='##'
-            while l2[0]=='#':
-                l2=myf2.readline()
+                    l2='##'
+                    while l2[0]=='#':
+                        l2=myf2.readline()
 
-            ogrpl='##'
-            while ogrpl[0]=='#':
-                ogrpl=outgrpf.readline()
+                    ogrpl='##'
+                    while ogrpl[0]=='#':
+                        ogrpl=outgrpf.readline()
 
-            while l1:
-                vcf_data1=l1.strip().split()
-                vcf_data2=l2.strip().split()
-                vcf_ogrp=ogrpl.strip().split()
-                anc_d=anc_file.readline().strip().split()
-                anc_pos=anc_d[0]
-                vcf_pos1=vcf_data1[1]
-                vcf_pos2=vcf_data2[1]
-                vcf_pos_ogrp=vcf_ogrp[1]
-                if not (anc_pos==vcf_pos1 and vcf_pos1==vcf_pos2 and vcf_pos2==vcf_pos_ogrp):
-                    print('files out of sync..')
-                    print(vcf_data1[:6],vcf_pos1)
-                    print(vcf_data2[:6],vcf_pos2)
-                    print(vcf_ogrp[:6],vcf_pos_ogrp)
-                    print(anc_d,anc_pos)
-                    input()
-                at_pos=int(float(anc_pos))
-                while at_pos>win_end:
-                    win_start+=win_step
-                    win_end+=win_step
-                    #print(win_start,win_end)
-                    out_dict.update({(win_start,win_end):{'A':[0,0,0,0,0,0,0,0,0],'C':[0,0,0,0,0,0,0,0,0],'G':[0,0,0,0,0,0,0,0,0],'T':[0,0,0,0,0,0,0,0,0]}})
-                anc_support=anc_d[2]
-                if anc_support=='3':
-                    qual1=vcf_data1[5]
-                    qual2=vcf_data2[5]
-                    qual_ogrp=vcf_ogrp[5]
-                    if not '.' in [qual1,qual2,qual_ogrp]:
-                        flag1=vcf_data1[6]
-                        flag2=vcf_data2[6]
-                        flag_ogrp=vcf_ogrp[6]
+                    while l1:
+                        vcf_data1=l1.strip().split()
+                        vcf_data2=l2.strip().split()
+                        vcf_ogrp=ogrpl.strip().split()
+                        anc_d=anc_file.readline().decode('utf-8').strip().split()
+                        anc_pos=anc_d[0]
+                        vcf_pos1=vcf_data1[1]
+                        vcf_pos2=vcf_data2[1]
+                        vcf_pos_ogrp=vcf_ogrp[1]
+                        if not (anc_pos==vcf_pos1 and vcf_pos1==vcf_pos2 and vcf_pos2==vcf_pos_ogrp):
+                            print('files out of sync..')
+                            print(vcf_data1[:6],vcf_pos1)
+                            print(vcf_data2[:6],vcf_pos2)
+                            print(vcf_ogrp[:6],vcf_pos_ogrp)
+                            print(anc_d,anc_pos)
+                            input()
+                        at_pos=int(float(anc_pos))
+                        while at_pos>win_end:
+                            win_start+=win_step
+                            win_end+=win_step
+                            #print(win_start,win_end)
+                            out_dict.update({(win_start,win_end):{'A':[0,0,0,0,0,0,0,0,0],'C':[0,0,0,0,0,0,0,0,0],'G':[0,0,0,0,0,0,0,0,0],'T':[0,0,0,0,0,0,0,0,0]}})
+                        anc_support=anc_d[2]
+                        if anc_support=='3':
+                            qual1=vcf_data1[5]
+                            qual2=vcf_data2[5]
+                            qual_ogrp=vcf_ogrp[5]
+                            if not '.' in [qual1,qual2,qual_ogrp]:
+                                flag1=vcf_data1[6]
+                                flag2=vcf_data2[6]
+                                flag_ogrp=vcf_ogrp[6]
 	##############################CONSIDER IF YOU WANT OTHER FILTERS#############################
-                        if (flag1 in ['PASS','.']) and (flag2 in ['PASS','.'] and (flag_ogrp in ['PASS','.'])):
+                                if (flag1 in ['PASS','.']) and (flag2 in ['PASS','.'] and (flag_ogrp in ['PASS','.'])):
 	###########################################################
-                            anc_nt=anc_d[1]
-                            ref_nt1=vcf_data1[3]
-                            alt_nt1=vcf_data1[4]
-                            ref_nt2=vcf_data2[3]
-                            alt_nt2=vcf_data2[4]
-                            ref_nt_ogrp=vcf_ogrp[3]
-                            alt_nt_ogrp=vcf_ogrp[4]
-                            [coverage1,genotype1]=get_genotype(vcf_data1[9:])
-                            [coverage2,genotype2]=get_genotype(vcf_data2[9:])
-                            [coverage_ogrp,genotype_ogrp]=get_genotype(vcf_ogrp[9:])
+                                    anc_nt=anc_d[1]
+                                    ref_nt1=vcf_data1[3]
+                                    alt_nt1=vcf_data1[4]
+                                    ref_nt2=vcf_data2[3]
+                                    alt_nt2=vcf_data2[4]
+                                    ref_nt_ogrp=vcf_ogrp[3]
+                                    alt_nt_ogrp=vcf_ogrp[4]
+                                    [coverage1,genotype1]=get_genotype(vcf_data1[9:])
+                                    [coverage2,genotype2]=get_genotype(vcf_data2[9:])
+                                    [coverage_ogrp,genotype_ogrp]=get_genotype(vcf_ogrp[9:])
 	##############################CONSIDER IF YOU WANT OTHER FILTERS#############################
-                            if check_if_pass_coverage(coverage1,LOW_COV_THRESH,HIGH_COV_THRESH) and check_if_pass_coverage(coverage2,LOW_COV_THRESH,HIGH_COV_THRESH) and check_if_pass_coverage(coverage_ogrp,LOW_COV_THRESH,HIGH_COV_THRESH):
+                                    if check_if_pass_coverage(coverage1,LOW_COV_THRESH,HIGH_COV_THRESH) and check_if_pass_coverage(coverage2,LOW_COV_THRESH,HIGH_COV_THRESH) and check_if_pass_coverage(coverage_ogrp,LOW_COV_THRESH,HIGH_COV_THRESH):
 	###########################################################
-                                if anc_nt in ANCESTRAL_FILTER:
-                                    var_form=check_if_ok_and_get_var_form(anc_nt,ref_nt1,ref_nt2,ref_nt_ogrp,alt_nt1,alt_nt2,alt_nt_ogrp)
-                                    if not var_form=='':
-                                        der_count_ogrp=orient_and_get_count(genotype_ogrp,ref_nt_ogrp,alt_nt_ogrp,anc_nt)
-                                        if der_count_ogrp>0:
-                                            if var_form=='OK_NO_VARIATION':
-                                                if ref_nt1==anc_nt:
-                                                    out_dict[(win_start,win_end)][anc_nt][0]+=1
-                                                else:
-                                                    out_dict[(win_start,win_end)][anc_nt][8]+=1
-                                            elif var_form=='OK_POLY':
-                                                der_count1=orient_and_get_count(genotype1,ref_nt1,alt_nt1,anc_nt)
-                                                der_count2=orient_and_get_count(genotype2,ref_nt2,alt_nt2,anc_nt)
-                                                out_dict[(win_start,win_end)][anc_nt][get_sample_conf(der_count1,der_count2)]+=1
-                l1=myf1.readline()
-                l2=myf2.readline()
-                ogrpl=outgrpf.readline()
-
-        outgrpf.close()
-    myf2.close()
-myf1.close()
-anc_file.close()
+                                        if anc_nt in ANCESTRAL_FILTER:
+                                            var_form=check_if_ok_and_get_var_form(anc_nt,ref_nt1,ref_nt2,ref_nt_ogrp,alt_nt1,alt_nt2,alt_nt_ogrp)
+                                            if not var_form=='':
+                                                der_count_ogrp=orient_and_get_count(genotype_ogrp,ref_nt_ogrp,alt_nt_ogrp,anc_nt)
+                                                if der_count_ogrp>0:
+                                                    if var_form=='OK_NO_VARIATION':
+                                                        if ref_nt1==anc_nt:
+                                                            out_dict[(win_start,win_end)][anc_nt][0]+=1
+                                                        else:
+                                                            out_dict[(win_start,win_end)][anc_nt][8]+=1
+                                                    elif var_form=='OK_POLY':
+                                                        der_count1=orient_and_get_count(genotype1,ref_nt1,alt_nt1,anc_nt)
+                                                        der_count2=orient_and_get_count(genotype2,ref_nt2,alt_nt2,anc_nt)
+                                                        out_dict[(win_start,win_end)][anc_nt][get_sample_conf(der_count1,der_count2)]+=1
+                        l1=myf1.readline()
+                        l2=myf2.readline()
+                        ogrpl=outgrpf.readline()
 
 outf=open(outPATH+'/chr'+the_chr+'_'+ind1+'_vs_'+ind2+'.txt','w')
 
