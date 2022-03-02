@@ -63,8 +63,8 @@ Rscript TTO_plot.R $OUTGROUP<br/>
 
 ---------------------------------------------------------
 
-vcf naming format:<br/>
-Both the TT and TTO method are set up to take compressed all-sites vcfs as input files, with one vcf per chromosome (22 vcfs per individual). To be useable, vcf file names should follow the format "...1.vcf.gz" for chromosome 1, and "...2.vcf.gz" for chromosome 2, and so on. For example, in the 'get_file_names.py' script provided, the keyword 'Neanderthal' points to a general vcf file name of ''     
+vcf file names:<br/>
+Both the TT and TTO method are set up to take compressed all-sites vcfs as input files, with one vcf per chromosome (22 vcfs per individual). To be useable, vcf file names should follow the naming convention format "...chr1.vcf.gz" for chromosome 1, and "...chr2.vcf.gz" for chromosome 2 etc. For example, in the 'get_file_names.py' script provided, the keyword 'Neanderthal' points to a general vcf file name of 'AltaiNea.hg19_1000g.dq.bqual.RG.realn-snpAD_chr.vcf.gz'. The actual vcf file names should be 'AltaiNea.hg19_1000g.dq.bqual.RG.realn-snpAD_chr1.vcf.gz' for chromosome 1, and so on.
 
 
 For reference:<br/>
