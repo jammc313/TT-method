@@ -26,7 +26,7 @@ def parse_var_genotypes(a_list):
         b_list.append(d[0])
     return b_list
 
-
+### User may need to edit depending on FORMAT field of called vcfs. Currently set up for standard GATK pipeline.
 def get_genotype(a_list):
     b_geno=''
     coverage=0
@@ -42,7 +42,6 @@ def get_genotype(a_list):
         else:
             coverage+=int(d[1])
     return [coverage,b_geno]
-
 
 
 def orient_and_get_count(genotype,ref_nt,alt_nt,anc_nt):
@@ -100,6 +99,7 @@ def get_sample_conf(der_count1,der_count2):
     print('THIS SHOULD NEVER HAPPEN')
     return 100
 
+
 def check_if_pass_coverage(a_coverage,LOW_COV_THRESH,HIGH_COV_THRESH):
     if (a_coverage>LOW_COV_THRESH and a_coverage<HIGH_COV_THRESH):
         return 1
@@ -112,6 +112,7 @@ def make_out_str(a_list):
     for x in a_list:
         b_str+=str(x)+','
     return b_str[:-1]
+
 
 ######### User should edit file paths below to point to ancestral state files and vcfs #############
 ancPath='/proj/ancestral_states'
@@ -127,21 +128,21 @@ outgrp=arg_list[4]
 ##########################
 ##########################
 
-#Get file name function to use ind1 ind2 etc and for outgroup
+# Get file name function to use ind1 ind2 etc and for outgroup
 outPATH='DIR_counts_per_5cm_TTO'
 
 file_dict=get_file_name.get_name_file_dict()
 vcf_file_one=vcf_path+'/'+file_dict[ind1]
 vcf_fileOne=vcf_file_one.split('.vc')
-vcf_file1=vcf_fileOne[0] + '.' + the_chr + '.vc' + vcf_fileOne[1]
+vcf_file1=vcf_fileOne[0] + the_chr + '.vc' + vcf_fileOne[1]
 
 vcf_file_two=vcf_path+'/'+file_dict[ind2]
 vcf_fileTwo=vcf_file_two.split('.vc')
-vcf_file2=vcf_fileTwo[0] + '.' + the_chr + '.vc' + vcf_fileTwo[1]
+vcf_file2=vcf_fileTwo[0] + the_chr + '.vc' + vcf_fileTwo[1]
 
 Out_grp_vcf=vcf_path+'/'+file_dict[outgrp]
 Outgrp_vcf=Out_grp_vcf.split('.vc')
-outgrp_vcf=Outgrp_vcf[0] + '.' + the_chr + '.vc' + Outgrp_vcf[1]
+outgrp_vcf=Outgrp_vcf[0] + the_chr + '.vc' + Outgrp_vcf[1]
 #sys.exit(outgrp_vcf)
 
 ##########################
@@ -153,11 +154,10 @@ nt_set=set(NUCL)
 ANCESTRAL_FILTER=['A','C','G','T']
 
 
-############################## User consider if you want other filters #############################
+############################## USER consider coverage thresholds to filter positions ###############
 LOW_COV_THRESH=10
 HIGH_COV_THRESH=500
 ####################################################################################################
-
 
 
 win_start=0
@@ -185,22 +185,41 @@ with ZipFile(ancPath+'/Ancestral_states.zip', 'r') as z:
                     while ogrpl[0]=='#':
                         ogrpl=outgrpf.readline()
 
-                    while l1:
+                    anc_l=anc_file.readline()
+		
+                    while l1 and l2 and ogrpl and anc_l:
                         vcf_data1=l1.strip().split()
                         vcf_data2=l2.strip().split()
                         vcf_ogrp=ogrpl.strip().split()
-                        anc_d=anc_file.readline().decode('utf-8').strip().split()
-                        anc_pos=anc_d[0]
+                        anc_d=anc_l.decode('utf-8').strip().split()
                         vcf_pos1=vcf_data1[1]
                         vcf_pos2=vcf_data2[1]
                         vcf_pos_ogrp=vcf_ogrp[1]
-                        if not (anc_pos==vcf_pos1 and vcf_pos1==vcf_pos2 and vcf_pos2==vcf_pos_ogrp):
-                            print('files out of sync..')
-                            print(vcf_data1[:6],vcf_pos1)
-                            print(vcf_data2[:6],vcf_pos2)
-                            print(vcf_ogrp[:6],vcf_pos_ogrp)
-                            print(anc_d,anc_pos)
-                            input()
+                        anc_pos=anc_d[0]
+
+
+	                while not vcf_pos1 == vcf_pos2 == vcf_pos_ogrp == anc_pos: # loop through to sync all vcfs and ancestral state positions
+                            if int(vcf_pos1) == min(int(vcf_pos1), int(vcf_pos2), int(vcf_pos_ogrp), int(anc_pos)):
+                                l1 = myf1.readline()
+                            elif int(vcf_pos2) == min(int(vcf_pos1), int(vcf_pos2), int(vcf_pos_ogrp), int(anc_pos)):
+                                l2 = myf2.readline()
+                            elif int(vcf_pos_ogrp) == min(int(vcf_pos1), int(vcf_pos2), int(vcf_pos_ogrp), int(anc_pos)):
+                                ogrpl = outgrpf.readline()
+                            elif int(anc_pos) == min(int(vcf_pos1), int(vcf_pos2), int(vcf_pos_ogrp), int(anc_pos)):
+                                anc_l = anc_file.readline()
+                            if l1 and l2 and ogrpl and anc_l:
+                                vcf_data1 = l1.strip().split()
+                                vcf_pos1 = vcf_data1[1]
+                                vcf_data2 = l2.strip().split()
+                                vcf_pos2 = vcf_data2[1]
+                                vcf_pos_ogrp = vcf_ogrp[1]
+                                anc_d = anc_l.decode('utf-8').strip().split()
+                                anc_pos = anc_d[0]
+                            else:
+                                break
+                        if not vcf_pos1 == vcf_pos2 == vcf_pos_ogrp == anc_pos:
+                            break
+
                         at_pos=int(float(anc_pos))
                         while at_pos>win_end:
                             win_start+=win_step
@@ -208,7 +227,7 @@ with ZipFile(ancPath+'/Ancestral_states.zip', 'r') as z:
                             #print(win_start,win_end)
                             out_dict.update({(win_start,win_end):{'A':[0,0,0,0,0,0,0,0,0],'C':[0,0,0,0,0,0,0,0,0],'G':[0,0,0,0,0,0,0,0,0],'T':[0,0,0,0,0,0,0,0,0]}})
                         anc_support=anc_d[2]
-                        if anc_support=='3':
+                        if anc_support=='3': # only consider site if ancestral state shared by all 3 apes
                             qual1=vcf_data1[5]
                             qual2=vcf_data2[5]
                             qual_ogrp=vcf_ogrp[5]
@@ -216,9 +235,9 @@ with ZipFile(ancPath+'/Ancestral_states.zip', 'r') as z:
                                 flag1=vcf_data1[6]
                                 flag2=vcf_data2[6]
                                 flag_ogrp=vcf_ogrp[6]
-	##############################CONSIDER IF YOU WANT OTHER FILTERS#############################
+	############################## USER CONSIDER IF YOU WANT OTHER FILTERS #############################
                                 if (flag1 in ['PASS','.']) and (flag2 in ['PASS','.'] and (flag_ogrp in ['PASS','.'])):
-	###########################################################
+	####################################################################################################
                                     anc_nt=anc_d[1]
                                     ref_nt1=vcf_data1[3]
                                     alt_nt1=vcf_data1[4]
@@ -229,9 +248,9 @@ with ZipFile(ancPath+'/Ancestral_states.zip', 'r') as z:
                                     [coverage1,genotype1]=get_genotype(vcf_data1[9:])
                                     [coverage2,genotype2]=get_genotype(vcf_data2[9:])
                                     [coverage_ogrp,genotype_ogrp]=get_genotype(vcf_ogrp[9:])
-	##############################CONSIDER IF YOU WANT OTHER FILTERS#############################
+	############################## CONSIDER IF YOU WANT OTHER FILTERS #############################
                                     if check_if_pass_coverage(coverage1,LOW_COV_THRESH,HIGH_COV_THRESH) and check_if_pass_coverage(coverage2,LOW_COV_THRESH,HIGH_COV_THRESH) and check_if_pass_coverage(coverage_ogrp,LOW_COV_THRESH,HIGH_COV_THRESH):
-	###########################################################
+	#############################################################################################
                                         if anc_nt in ANCESTRAL_FILTER:
                                             var_form=check_if_ok_and_get_var_form(anc_nt,ref_nt1,ref_nt2,ref_nt_ogrp,alt_nt1,alt_nt2,alt_nt_ogrp)
                                             if not var_form=='':
@@ -249,6 +268,7 @@ with ZipFile(ancPath+'/Ancestral_states.zip', 'r') as z:
                         l1=myf1.readline()
                         l2=myf2.readline()
                         ogrpl=outgrpf.readline()
+                        anc_l=anc_file.readline()
 
 outf=open(outPATH+'/chr'+the_chr+'_'+ind1+'_vs_'+ind2+'.txt','w')
 
