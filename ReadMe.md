@@ -39,25 +39,25 @@ This script contains functions used by 'get_estimates_TT.py' and 'get_estimates_
 
 ---------------------------------------------------------
 
-Implementation:
-The User should create the following directories at the same location as scripts:
-DIR_counts_per_5cm_TT
-DIR_counts_per_5cm_TTO_$OUTGROUP 
-DIR_error_TT
-DIR_error_TTO
-DIR_estimates_TT
-DIR_estimates_TTO/$OUTGROUP_res/ 
-DIR_plots/TTO_$OUTGROUP
+Implementation:<br/>
+The User should create the following directories at the same location as scripts:<br/>
+DIR_counts_per_5cm_TT<br/>
+DIR_counts_per_5cm_TTO_$OUTGROUP<br/>
+DIR_error_TT<br/>
+DIR_error_TTO<br/>
+DIR_estimates_TT<br/>
+DIR_estimates_TTO/$OUTGROUP_res/<br/> 
+DIR_plots/TTO_$OUTGROUP<br/>
 (where $OUTGROUP is the keyword of an outgroup individual from 'get_file_name.py')
 
 Once the necessary script have been edited to include vcf locations, the TT & TTO methods can be implemented simply by using:<br/>
 bash get_counts_TT.sh<br/>
-python get_estimates_TT.py
+python get_estimates_TT.py<br/>
 Rscript TT_plot.R
 
 bash get_counts_TTO.sh<br/>
-python get_estimates_TTO.py $OUTGROUP 
-Rscript TTO_plot.R $OUTGROUP 
+python get_estimates_TTO.py $OUTGROUP<br/> 
+Rscript TTO_plot.R $OUTGROUP<br/> 
 (where OUTGROUP is the keyword of an outgroup individual from 'get_file_name.py')
 
 
