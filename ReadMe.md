@@ -12,18 +12,18 @@ Both TT and TTO methods require the ancestral states at all positions in the gen
 
 ---------------------------------------------------------
 
-Description of scripts:
+Brief description of included scripts:
 
-'get_file_name.py' - this script links keywords to full vcf file names and paths for ease of implementation. The User should edit to include vcf file paths and a relevant keyword for each individual's vcfs.
+'get_file_name.py' - this links keywords to full vcf file names and paths for ease of implementation. The User should edit to include vcf file paths and a relevant keyword for each individual's vcfs.
 
 'count_sample_confs_per_ind_TT.py' & 'count_sample_confs_per_ind_TTO.py'.<br/>
-These scripts take all-sites vcfs as input, and return counts of sample configurations in 5MB blocks of the genome. Users should edit each script to include file paths for downloaded/created ancestral state files and vcf files. Resulting counts are outputted to 'DIR_counts_per_5cm_TT/' and 'DIR_counts_per_5cm_TTO/' respectively.
+These scripts take all-sites vcfs as input, and return counts of sample configurations in 5MB blocks of the genome. Users should edit each script to include file paths for ancestral state and vcf files. Resulting counts are outputted to 'DIR_counts_per_5cm_TT/' and 'DIR_counts_per_5cm_TTO/' respectively.
 
 'get_counts_TT.sh' and 'get_counts_TTO.sh'.<br/>
 These are example SLURM submission scripts that can be used to implement the above scripts for the 22 autosomes of the human genome, and for as many pairwise individual comparisons as desired. Users should edit to include relevant vcf keywords and SLURM commands.
 
 'get_estimates_TT.py'.<br/>
-This script uses the sample configuration counts previously obtained to estimate parameters including divergence times. Results are outputted to 'DIR_estimates_TT/'.
+This uses the sample configuration counts previously obtained to estimate parameters including divergence times. Results are outputted to 'DIR_estimates_TT/'.
 
 'get_estimates_TTO.py'.<br/>
 This script uses the sample configuration counts previously obtained to estimate parameters including divergence times. Results are outputted to 'DIR_estimates_TTO/'.
@@ -39,7 +39,8 @@ This script contains functions used by 'get_estimates_TT.py' and 'get_estimates_
 
 ---------------------------------------------------------
 
-Implementation:<br/>
+Implementation:
+
 The User should create the following directories at the same location as scripts:<br/>
 DIR_counts_per_5cm_TT<br/>
 DIR_counts_per_5cm_TTO_$OUTGROUP<br/>
@@ -63,9 +64,11 @@ Rscript TTO_plot.R $OUTGROUP<br/>
 
 ---------------------------------------------------------
 
-vcf file names:<br/>
+vcf file names:
+
 Both the TT and TTO method are set up to take compressed all-sites vcfs as input files, with one vcf per chromosome (22 vcfs per individual). To be useable, vcf file names should follow the naming convention format "...chr1.vcf.gz" for chromosome 1, and "...chr2.vcf.gz" for chromosome 2 etc. For example, in the 'get_file_names.py' script provided, the keyword 'Neanderthal' points to a general vcf file name of 'AltaiNea.hg19_1000g.dq.bqual.RG.realn-snpAD_chr.vcf.gz'. The actual vcf file names should be 'AltaiNea.hg19_1000g.dq.bqual.RG.realn-snpAD_chr1.vcf.gz' for chromosome 1, and so on.
 
+---------------------------------------------------------
 
 For reference:<br/>
 Estimating divergence times from DNA sequences.<br/>
