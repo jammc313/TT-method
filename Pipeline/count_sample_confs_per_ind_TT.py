@@ -27,7 +27,7 @@ def parse_var_genotypes(a_list):
         b_list.append(d[0])
     return b_list
 
-
+# For vcfs produced by GATK pipeline, may need to alter depending on FORMAT field 
 def get_genotype(a_list):
     b_geno=''
     coverage=0
@@ -134,11 +134,11 @@ outPATH='DIR_counts_per_5cm_TT'
 file_dict=get_file_name.get_name_file_dict()
 vcf_file_one=vcf_path+'/'+file_dict[ind1]
 vcf_fileOne=vcf_file_one.split('.vc')
-vcf_file1=vcf_fileOne[0] + '.' + the_chr + '.vc' + vcf_fileOne[1]
+vcf_file1=vcf_fileOne[0] + the_chr + '.vc' + vcf_fileOne[1]
 
 vcf_file_two=vcf_path+'/'+file_dict[ind2]
 vcf_fileTwo=vcf_file_two.split('.vc')
-vcf_file2=vcf_fileTwo[0] + '.' + the_chr + '.vc' + vcf_fileTwo[1]
+vcf_file2=vcf_fileTwo[0] + the_chr + '.vc' + vcf_fileTwo[1]
 
 ##########################
 ##########################
@@ -149,7 +149,7 @@ nt_set=set(NUCL)
 ANCESTRAL_FILTER=['A','C','G','T']
 
 
-############################## User consider if you want other filters #############################
+############################## User consider coverage thresholds to filter sites #############################
 LOW_COV_THRESH=10
 HIGH_COV_THRESH=500
 ####################################################################################################
@@ -172,19 +172,34 @@ with ZipFile(ancPath+'/Ancestral_states.zip', 'r') as z:
                 l2='##'
                 while l2[0]=='#':
                     l2=myf2.readline()
-                while l1:
+                anc_l=anc_file.readline()
+                while l1 and l2 and anc_l:
                     vcf_data1=l1.strip().split()
                     vcf_data2=l2.strip().split()
-                    anc_d=anc_file.readline().decode('utf-8').strip().split()
-                    anc_pos=anc_d[0]
+                    anc_d=anc_l.decode('utf-8').strip().split()                      
                     vcf_pos1=vcf_data1[1]
                     vcf_pos2=vcf_data2[1]
-                    if not (anc_pos==vcf_pos1 and vcf_pos1==vcf_pos2):
-                        print('files out of sync..')
-                        print(vcf_data1[:6],vcf_pos1)
-                        print(vcf_data2[:6],vcf_pos2)
-                        print(anc_d,anc_pos)
-                        input()
+                    anc_pos=anc_d[0]
+                    
+                    while not vcf_pos1 == vcf_pos2 == anc_pos:  # loop through to sync vcf and ancestral file positions. Break if end-of-file occurs.
+                        if int(vcf_pos1) == min(int(vcf_pos1), int(vcf_pos2), int(anc_pos)):
+                            l1 = myf1.readline()
+                        elif int(vcf_pos2) == min(int(vcf_pos1), int(vcf_pos2), int(anc_pos)):
+                            l2 = myf2.readline()
+                        elif int(anc_pos) == min(int(vcf_pos1), int(vcf_pos2), int(anc_pos)):
+                            anc_l = anc_file.readline()
+                        if l1 and l2 and anc_l:
+                            vcf_data1 = l1.strip().split()
+                            vcf_pos1 = vcf_data1[1]
+                            vcf_data2 = l2.strip().split()
+                            vcf_pos2 = vcf_data2[1]
+                            anc_d = anc_l.decode('utf-8').strip().split()
+                            anc_pos = anc_d[0]
+                        else:
+                            break                                                                        
+                    if not anc_pos==vcf_pos1==vcf_pos2:
+                        break
+                        
                     at_pos=int(float(anc_pos))
                     while at_pos>win_end:
                         win_start+=win_step
@@ -192,13 +207,13 @@ with ZipFile(ancPath+'/Ancestral_states.zip', 'r') as z:
                         #print(win_start,win_end)
                         out_dict.update({(win_start,win_end):{'A':[0,0,0,0,0,0,0,0,0],'C':[0,0,0,0,0,0,0,0,0],'G':[0,0,0,0,0,0,0,0,0],'T':[0,0,0,0,0,0,0,0,0]}})
                     anc_support=anc_d[2]
-                    if anc_support=='3':
+                    if anc_support=='3': # only consider positions where ancestral state is same in all 3 apes
                         qual1=vcf_data1[5]
                         qual2=vcf_data2[5]
                         if not '.' in [qual1,qual2]:
                             flag1=vcf_data1[6]
                             flag2=vcf_data2[6]
-##############################CONSIDER IF YOU WANT OTHER FILTERS#############################
+##############################USER CONSIDER IF YOU WANT OTHER FILTERS#############################
                             if (flag1 in ['PASS','.']) and (flag2 in ['PASS','.']):
 ###########################################################
                                 anc_nt=anc_d[1]
@@ -229,6 +244,7 @@ with ZipFile(ancPath+'/Ancestral_states.zip', 'r') as z:
                                                 out_dict[(win_start,win_end)][anc_nt][get_sample_conf(der_count1,der_count2)]+=1
                     l1=myf1.readline()
                     l2=myf2.readline()
+                    anc_l=anc_file.readline()
 
 outf=open(outPATH+'/chr'+the_chr+'_'+ind1+'_vs_'+ind2+'.txt','w')
 
