@@ -125,9 +125,6 @@ def estimate_param(in_tuple):
 	return [alfa1,alfa2,thetaA,mu_t1,mu_t2,mu_nu1,mu_nu2,mu_t1_t2_diff,drift1,drift2,theta1,theta2,W1ratio,W2ratio,D1,D2,P1,P2,P1_time,P2_time,Fst]
 
 
-
-
-
 def get_res(raw_data):
 	obs_d=[]
 	for i in range(len(raw_data[0])):
