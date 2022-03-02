@@ -129,7 +129,7 @@ outgrp=arg_list[4]
 ##########################
 
 # Get file name function to use ind1 ind2 etc and for outgroup
-outPATH='DIR_counts_per_5cm_TTO'
+outPATH='DIR_counts_per_5cm_TTO_'+outgrp
 
 file_dict=get_file_name.get_name_file_dict()
 vcf_file_one=vcf_path+'/'+file_dict[ind1]
