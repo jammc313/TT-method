@@ -14,47 +14,45 @@ doAllBranchPlotVertical=function(Param1,Param2,Param3,Param4,Param5,Param6,yLow,
 	theY1=as.numeric(Param1$wbj_mean)
 	lowY1=as.numeric(Param1$wbj_mean)-2.0*sqrt(as.numeric(Param1$wbj_var))
 	highY1=as.numeric(Param1$wbj_mean)+2.0*sqrt(as.numeric(Param1$wbj_var))
-	theB1=as.numeric(Param3$wbj_mean)
-	lowB1=as.numeric(Param3$wbj_mean)-2.0*sqrt(as.numeric(Param3$wbj_var))
-	highB1=as.numeric(Param3$wbj_mean)+2.0*sqrt(as.numeric(Param3$wbj_var))
 	theC1=as.numeric(Param5$wbj_mean)
 	lowC1=as.numeric(Param5$wbj_mean)-2.0*sqrt(as.numeric(Param5$wbj_var))
 	highC1=as.numeric(Param5$wbj_mean)+2.0*sqrt(as.numeric(Param5$wbj_var))
+	
+        if (Param2=='None'){
+                allY=theY1
+                lowallY=lowY1
+                highallY=highY1
+                allC=theC1
+                lowC=lowC1
+                highC=highC1
+                p1_names=as.character(Param1$pop1)
+                p2_names=as.character(Param1$pop2)
+                branch_names=as.character(Param1$branch)
 
-	theY2=as.numeric(Param2$wbj_mean)
-	lowY2=as.numeric(Param2$wbj_mean)-2.0*sqrt(as.numeric(Param2$wbj_var))
-	highY2=as.numeric(Param2$wbj_mean)+2.0*sqrt(as.numeric(Param2$wbj_var))
-	theB2=as.numeric(Param4$wbj_mean)
-	lowB2=as.numeric(Param4$wbj_mean)-2.0*sqrt(as.numeric(Param4$wbj_var))
-	highB2=as.numeric(Param4$wbj_mean)+2.0*sqrt(as.numeric(Param4$wbj_var))
-	theC2=as.numeric(Param6$wbj_mean)
-	lowC2=as.numeric(Param6$wbj_mean)-2.0*sqrt(as.numeric(Param6$wbj_var))
-	highC2=as.numeric(Param6$wbj_mean)+2.0*sqrt(as.numeric(Param6$wbj_var))
-
-	allY=c(theY1,theY2)
-	lowallY=c(lowY1,lowY2)
-	highallY=c(highY1,highY2)
-	allB=c(theB1,theB2)
-	lowB=c(lowB1,lowB2)
-	highB=c(highB1,highB2)
-	allC=c(theC1,theC2)
-	lowC=c(lowC1,lowC2)
-	highC=c(highC1,highC2)
-
-	p1_names=c(as.character(Param1$pop1),as.character(Param2$pop2))
-	p2_names=c(as.character(Param1$pop2),as.character(Param2$pop1))
-	branch_names=c(as.character(Param1$branch),as.character(Param2$branch))
-
+        }else{
+                theY2=as.numeric(Param2$wbj_mean)
+                lowY2=as.numeric(Param2$wbj_mean)-2.0*sqrt(as.numeric(Param2$wbj_var))
+                highY2=as.numeric(Param2$wbj_mean)+2.0*sqrt(as.numeric(Param2$wbj_var))
+                allY=c(theY1,theY2)
+                lowallY=c(lowY1,lowY2)
+                highallY=c(highY1,highY2)
+                theC2=as.numeric(Param6$wbj_mean)
+                lowC2=as.numeric(Param6$wbj_mean)-2.0*sqrt(as.numeric(Param6$wbj_var))
+                highC2=as.numeric(Param6$wbj_mean)+2.0*sqrt(as.numeric(Param6$wbj_var))
+                allC=c(theC1,theC2)
+                lowC=c(lowC1,lowC2)
+                highC=c(highC1,highC2)
+                p1_names=c(as.character(Param1$pop1),as.character(Param2$pop2))
+                p2_names=c(as.character(Param1$pop2),as.character(Param2$pop1))
+                branch_names=c(as.character(Param1$branch),as.character(Param2$branch))
+        }
+	
 	theX=seq(1,length(allY))
 	theOrder=rev(order(allY))
 
         allY=allY[theOrder]
         lowallY=lowallY[theOrder]
         highallY=highallY[theOrder]
-
-        allB=allB[theOrder]
-        lowB=lowB[theOrder]
-        highB=highB[theOrder]
 
         allC=allC[theOrder]
         lowC=lowC[theOrder]
@@ -64,21 +62,15 @@ doAllBranchPlotVertical=function(Param1,Param2,Param3,Param4,Param5,Param6,yLow,
         p2_names=p2_names[theOrder]
         branch_names=branch_names[theOrder]
 
-	#par(xaxt='n',yaxt='n',xpd=NA,bty='n')
 	par(yaxt='n',xpd=NA,bty='n')
 	par(mar = c(5,5,5,5))
-
-	#plot(allB,theX,type='n',xlim=c(yLow,yHigh),ylab='',xlab=paramName)
-	plot(allB,theX,type='n',xlim=c(yLow,yHigh),ylab='',xlab='',xaxt='n')
+	plot(allC,theX,type='n',xlim=c(yLow,yHigh),ylab='',xlab='',xaxt='n')
 
 	segments(0,0,0,length(theOrder),col='black',lty=1)
 	A=1000*c(-300,-200,-100,0,100,200,300,400,500,600,700,800,900,1000)/transformScale
 	B=A-(50000/transformScale)
 	segments(A,rep(0,length(A)),A,rep(length(theOrder),length(A)),col='black',lty=3)
 	segments(B,rep(0,length(B)),B,rep(length(theOrder),length(B)),col='grey',lty=3)
-
-	points(allB,theX,pch=5,cex=0.6,col=sapply(branch_names,myGetBranchColor))
-	segments(lowB,theX,highB,col=sapply(branch_names,myGetBranchColor))
 
 	points(allC,theX,pch=4,cex=0.6,col=sapply(branch_names,myGetBranchColor))
 	segments(lowC,theX,highC,col=sapply(branch_names,myGetBranchColor))
@@ -93,8 +85,6 @@ doAllBranchPlotVertical=function(Param1,Param2,Param3,Param4,Param5,Param6,yLow,
 		plot(allY,theX,type='n',xlab='',ylab='',xlim=c(transformScale*yLow,transformScale*yHigh),axes=F)
 		axis(side=1)
 		mtext(side=1,line=3,transformText)
-		#axis(side=3)
-		#mtext(side=3,line=3,transformText)
 	}
 }
 
@@ -174,37 +164,41 @@ doAllBranchPlotHorizontal=function(Param1,Param2,Param3,Param4,yLow,yHigh,popTex
 
 ###############CONDITIONING ON AN OUTGROUP##################################
 
-pdf('DIR_plots/div_estimates_TTO.pdf',width=7,height=13)
-Param1=read.table('DIR_estimates_TTO/J1_cond.res',header=T)
-Param2=read.table('DIR_estimates_TTO/J2_cond.res',header=T)
-Param3=read.table('DIR_estimates_TTO/B1_cond.res',header=T)
-Param4=read.table('DIR_estimates_TTO/B2_cond.res',header=T)
-Param5=read.table('DIR_estimates_TTO/T1_cond.res',header=T)
-Param6=read.table('DIR_estimates_TTO/T2_cond.res',header=T)
-#yLow=-0.000125
-#yHigh=0.00045
+# take argument to Rscript as outgroup
+args <- commandArgs(TRUE)
+# test if there is at least one argument: if not, return an error
+if (length(args)==0) {
+  stop("An outgroup needs to be supplied as argument", call.=FALSE)
+} else if (length(args)>1) {
+  stop("Only a single outgroup may be specified", call.=FALSE)
+}
+theCond <- args[1]
+
+pdf('DIR_plots/TTO_',theCond,'/div_estimates_TTO.pdf',width=7,height=13)
+Param1=read.table('DIR_estimates_TTO/',theCond,'_res/J1_cond.res',header=T)
+Param2=read.table('DIR_estimates_TTO/',theCond,'_res/J2_cond.res',header=T)
+Param3=read.table('DIR_estimates_TTO/',theCond,'_res/B1_cond.res',header=T)
+Param4=read.table('DIR_estimates_TTO/',theCond,'_res/B2_cond.res',header=T)
+Param5=read.table('DIR_estimates_TTO/',theCond,'_res/T1_cond.res',header=T)
+Param6=read.table('DIR_estimates_TTO/',theCond,'_res/T2_cond.res',header=T)
 yLow=-0.0000
-yHigh=0.00015
+yHigh=0.00022
 popTextSize=0.4
 transformScale=assumedGen/assumedMut
-#transformText=paste('years w mu=',as.character(assumedMut),' and gen time=',as.character(assumedGen),sep='')
 transformText='time in years'
 doAllBranchPlotVertical(Param1,Param2,Param3,Param4,Param5,Param6,yLow,yHigh,popTextSize,1,'T',1,tranformScale,transformText)
-#legend('right',legend=c('non-African','out-of-Africa','West/East Afr split','Mbuti split','Khoe-San split','Archaic split','Neand/Denis split','Mandenka-Yoruba'),pch=19,col=c('pink','purple','skyblue','red','green','black','grey','blue'),bty='n',cex=0.7)
-legend('right',legend=c('Linear estimation','Correcting with tau3','time to first coalescent event in ancestral pop'),pch=c(3,4,5),bty='n',cex=0.8)
+legend('right',legend=c('Linear estimation','Correcting with tau3'),pch=c(3,4),bty='n',cex=0.8)
 dev.off()
 
-
-pdf('DIR_plots/tau_estimates_cond.pdf',width=7,height=13)
-Param1=read.table('DIR_estimates_TTO/tau3_1_cond.res',header=T)
-Param2=read.table('DIR_estimates_TTO/tau3_2_cond.res',header=T)
-Param3=read.table('DIR_estimates_TTO/tau2_1_cond.res',header=T)
-Param4=read.table('DIR_estimates_TTO/tau2_2_cond.res',header=T)
+pdf('DIR_plots/TTO_',theCond,'/tau_estimates_cond.pdf',width=7,height=13)
+Param1=read.table('DIR_estimates_TTO/',theCond,'_res/tau3_1_cond.res',header=T)
+Param2=read.table('DIR_estimates_TTO/',theCond,'_res/tau3_2_cond.res',header=T)
+Param3=read.table('DIR_estimates_TTO/',theCond,'_res/tau2_1_cond.res',header=T)
+Param4=read.table('DIR_estimates_TTO/',theCond,'_res/tau2_2_cond.res',header=T)
 yLow=0
 yHigh=0.0005
 popTextSize=0.4
 transformScale=assumedGen/assumedMut
-#transformText=paste('years w mu=',as.character(assumedMut),' and gen time=',as.character(assumedGen),sep='')
 transformText='time in years'
 doAllBranchPlotHorizontal(Param1,Param2,Param3,Param4,yLow,yHigh,popTextSize,1,'T',1,tranformScale,transformText,3,1)
 legend('top',legend=c('3tau3','tau2'),pch=c(3,4),bty='n',cex=1)
