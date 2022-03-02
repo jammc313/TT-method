@@ -1,4 +1,5 @@
 import os
+import sys
 import wbj
 from math import log
 
@@ -145,8 +146,6 @@ def get_res(raw_data,cond_raw_data):
 	for a_tuple in cond_raw_data:
 		for i in range(len(a_tuple)):
 			obs_cond_d[i]+=a_tuple[i]
-	#print(obs_d)
-	#raw_input()
 	[obs_alfa1,obs_alfa2,obs_test1,obs_test2,obs_y,obs_tau2_1,obs_tau2_2,obs_tau3_1,obs_tau3_2,obs_B1,obs_B2,obs_U1,obs_U2,obs_V1,obs_V2,obs_tau_test,obs_T1,obs_T2,obs_J1,obs_J2]=estimate_param(obs_d,obs_cond_d)
 	l_alfa1=[]
 	l_alfa2=[]
@@ -171,7 +170,7 @@ def get_res(raw_data,cond_raw_data):
 	num_sites=[]
 	g=0
 	n=0
-	for i in range(len(raw_data)):
+	for i in range(len(cond_raw_data)):
 		a_t=raw_data[i]
 		a_cond_t=cond_raw_data[i]
 		if sum(a_t)>0:
@@ -229,24 +228,21 @@ def get_res(raw_data,cond_raw_data):
 
 def get_estimates(file_dict,cond_file_dict):
 	b_dict={}
-	tot_tuples=len(file_dict.keys())
+	tot_tuples=len(cond_file_dict.keys())
 	at_tuple=0
-	for a_tuple in file_dict.keys():
+	for a_tuple in cond_file_dict.keys():
 		at_tuple+=1
 		print(a_tuple,'num',at_tuple,'out of',tot_tuples)
-		file_list=file_dict[a_tuple]
-		count_list=get_count_list(file_list)
-
-		if a_tuple in cond_file_dict.keys():
-			cond_file_list=cond_file_dict[a_tuple]
-			cond_count_list=get_count_list(cond_file_list)
-		elif (a_tuple[1],a_tuple[0]) in cond_file_dict.keys():
-			cond_file_list=cond_file_dict[a_tuple]
-			cond_count_list=get_inverse_count_list(cond_file_list)
+		cond_file_list=cond_file_dict[a_tuple]
+		cond_count_list=get_count_list(cond_file_list)
+		if a_tuple in file_dict.keys():
+			file_list=file_dict[a_tuple]
+			count_list=get_count_list(file_list)
+		elif (a_tuple[1],a_tuple[0]) in file_dict.keys():
+			file_list=file_dict[(a_tuple[1], a_tuple[0])]
+			count_list=get_inverse_count_list(file_list)
 		b_dict.update({a_tuple:get_res(count_list,cond_count_list)})
 	return b_dict
-
-
 
 
 def get_branch_name(i1,i2):
@@ -257,15 +253,19 @@ def get_branch_name(i1,i2):
 			return 'Kankanaey_branch'
 	return 'unspecified_branch'
 
+### Assign outgroup individual
+arg_list=sys.argv
+THE_COND=arg_list[1]
 
-COND_in_path='DIR_counts_per_5cm_TTO'
+### Specify path to DIR containing counts for this outgroup
+COND_in_path='DIR_counts_per_5cm_TTO_'+THE_COND
 COND_file_dict={}
 temp=os.listdir(COND_in_path)
 for x in temp:
 	if x[:len('chr')]=='chr':
 		d=x.split('_')
 		#print(d)
-		pop_tuple=(d[1],d[3][:-len('.txt')])
+		pop_tuple=(d[1],d[3]))
 		#print(pop_tuple=)
 		#input()
 		if not pop_tuple in COND_file_dict.keys():
@@ -273,7 +273,7 @@ for x in temp:
 		COND_file_dict[pop_tuple].append(COND_in_path+'/'+x)
 
 
-
+### Specify path to DIR containing TT counts
 file_dict={}
 in_path='DIR_counts_per_5cm_TT'
 all_files=os.listdir(in_path)
@@ -306,7 +306,7 @@ for x in sorted(all_comps):
 		print(x,'not in conditional data')
 		input()
 
-outPATH='DIR_estimates_TTO'
+outPATH='DIR_estimates_TTO'+THE_COND+'_res'
 
 alfa1_out=open(outPATH+'/alfa1_cond.res','w')
 alfa2_out=open(outPATH+'/alfa2_cond.res','w')
@@ -357,9 +357,7 @@ T2_out.write(header)
 J1_out.write(header)
 J2_out.write(header)
 
-
 m_counts_out.write(','.join(['branch','pop1','pop2','m10','m01','m20','m02','m11','m21','m12','m00'])+'\n')
-
 
 a_res_dict=get_estimates(file_dict,COND_file_dict)
 for a_comp in sorted(a_res_dict.keys()):
