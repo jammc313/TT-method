@@ -270,7 +270,7 @@ with ZipFile(ancPath+'/Ancestral_states.zip', 'r') as z:
                         ogrpl=outgrpf.readline()
                         anc_l=anc_file.readline()
 
-outf=open(outPATH+'/chr'+the_chr+'_'+ind1+'_vs_'+ind2+'.txt','w')
+outf=open(outPATH+'/chr'+the_chr+'_'+ind1+'_vs_'+ind2+'_vs_'+outgrp+'.txt','w')
 
 for a_tuple in sorted(out_dict.keys()):
     out_str=str(a_tuple[0])+','+str(a_tuple[1])
